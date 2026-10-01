@@ -1,0 +1,17 @@
+{
+  "validUser": {
+    "firstName": "Komal",
+    "lastName": "Kumar",
+    "email": "komali906@gmail.com",
+    "mobile": "8877455602",
+    "password": "Komali@123456"
+  },
+
+  "invalidUser": {
+    "firstName": "Kisan",
+    "lastName": "Ojha",
+    "email": "",
+    "mobile": "9999999999",
+    "password": "Password@123"
+  }
+}

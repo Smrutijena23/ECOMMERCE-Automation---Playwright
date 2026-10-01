@@ -1,0 +1,52 @@
+{
+    "validUser": {
+        "email": "komali906@gmail.com",
+        "password": "Komali@123456"
+    },
+
+    "invalidPassword": {
+        "email": "komali906@gmail.com",
+        "password": "WrongPassword"
+    },
+
+    "invalidEmail": {
+        "email": "abc@gmail.com",
+        "password": "Komali@123456"
+    },
+
+  
+"blankEmail": {
+    "email": "",
+    "password": "Password@123"
+  },
+
+  "blankPassword": {
+    "email": "your_registered_email@gmail.com",
+    "password": ""
+  },
+
+  "blankCredentials": {
+    "email": "",
+    "password": ""
+  },
+
+  "numbersOnly": {
+    "email": "123456789",
+    "password": "123456789"
+  },
+
+  "invalidEmailFormat": {
+    "email": "abcgmail.com",
+    "password": "Password@123"
+  },
+
+  "specialCharacters": {
+    "email": "@@@@@@@",
+    "password": "######"
+  },
+
+  "longCredentials": {
+    "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@gmail.com",
+    "password": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+}
