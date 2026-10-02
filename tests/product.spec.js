@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
 const ProductPage = require('../pages/ProductPage');
 
-const loginData = require('../fixtures/loginData.json');
+const loginData = require('../fixtures/logindata.json');
 const productData = require('../fixtures/productData.json');
 
 test.describe("Product Module", () => {

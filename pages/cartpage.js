@@ -5,100 +5,79 @@ class CartPage extends BasePage {
     constructor(page) {
         super(page);
 
-        // -----------------------------
-        // Navigation
-        // -----------------------------
-
-        this.cartLink = page.locator(
-            "[routerlink='/dashboard/cart']"
-        );
-
-
-        // -----------------------------
-        // Cart
-        // -----------------------------
-
+        // Cart page elements
         this.cartItems = page.locator(".cartSection");
+        this.cartProductNames = page.locator(".cartSection h3");
 
-        this.cartProductNames = page.locator(
-            ".cartSection h3"
-        );
+        // Cart navigation
+        this.cartButton = page.getByRole("link", { name: /cart/i });
 
-
-        // -----------------------------
-        // Buttons
-        // -----------------------------
-
-        this.continueShoppingButton = page.getByRole(
-            "button",
-            {
-                name: /continue shopping/i
-            }
-        );
-
-
-        // -----------------------------
-        // Empty Cart Message
-        // -----------------------------
-
-        this.emptyCartMessage = page.getByText(
-            "No Products in Your Cart !",
-            {
-                exact: true
-            }
-        );
-    }
-
-
-    // ==========================================
-    // Open Cart
-    // ==========================================
-
-    async openCart() {
-
-        await this.cartLink.click();
-
-        await this.page.waitForURL(
-            /\/dashboard\/cart/
-        );
-    }
-
-
-    // ==========================================
-    // Get Cart Product
-    // ==========================================
-
-    getCartProduct(productName) {
-
-        return this.cartItems.filter({
-            hasText: productName
+        // Continue Shopping button
+        this.continueShoppingButton = page.getByRole("button", {
+            name: /continue shopping/i
         });
     }
 
 
-    // ==========================================
-    // Check Product Is Visible
-    // ==========================================
+    // -----------------------------------------
+    // Open Cart
+    // -----------------------------------------
+
+    async openCart() {
+
+        await this.page.getByRole("link", {
+            name: /cart/i
+        }).click();
+
+        await this.page.waitForURL(/\/cart/);
+    }
+
+
+    // -----------------------------------------
+    // Verify Cart Page is displayed
+    // -----------------------------------------
+
+    async isCartPageDisplayed() {
+
+        return await this.page
+            .getByRole("heading", { name: /my cart/i })
+            .isVisible();
+    }
+
+
+    // -----------------------------------------
+    // Get number of products in cart
+    // -----------------------------------------
+
+    async getCartItemCount() {
+
+        return await this.cartItems.count();
+    }
+
+
+    // -----------------------------------------
+    // Check product is present in cart
+    // -----------------------------------------
 
     async isProductVisible(productName) {
 
-        const product = this.getCartProduct(
-            productName
-        );
+        const product = this.cartItems.filter({
+            hasText: productName
+        });
 
         return await product.isVisible();
     }
 
 
-    // ==========================================
-    // Verify Product
-    // ==========================================
+    // -----------------------------------------
+    // Verify product is present
+    // -----------------------------------------
 
     async verifyProduct(productName) {
 
-        const product = this.getCartProduct(
-            productName
-        );
+        const product = this.cartItems.filter({
+            hasText: productName
+        });
 
         await product.waitFor({
             state: "visible"
@@ -106,78 +85,45 @@ class CartPage extends BasePage {
     }
 
 
-    // ==========================================
-    // Get Number Of Cart Products
-    // ==========================================
-
-    async getProductCount() {
-
-        return await this.cartItems.count();
-    }
-
-
-    // ==========================================
-    // Remove Product
-    // ==========================================
+    // -----------------------------------------
+    // Remove product from cart
+    // -----------------------------------------
 
     async removeProduct(productName) {
 
-        const product = this.getCartProduct(
-            productName
-        );
-
-        await product
-            .getByRole("button")
-            .last()
-            .click();
-    }
-
-
-    // ==========================================
-    // Buy Product
-    // ==========================================
-
-    async buyProduct(productName) {
-
-        const product = this.getCartProduct(
-            productName
-        );
+        const product = this.cartItems.filter({
+            hasText: productName
+        });
 
         await product
             .getByRole("button", {
-                name: /buy now/i
+                name: /delete|remove/i
             })
             .click();
     }
 
 
-    // ==========================================
+    // -----------------------------------------
+    // Verify product is removed
+    // -----------------------------------------
+
+    async isProductRemoved(productName) {
+
+        const product = this.cartItems.filter({
+            hasText: productName
+        });
+
+        return await product.count() === 0;
+    }
+
+
+    // -----------------------------------------
     // Continue Shopping
-    // ==========================================
+    // -----------------------------------------
 
     async continueShopping() {
 
         await this.continueShoppingButton.click();
-    }
-
-
-    // ==========================================
-    // Check Empty Cart
-    // ==========================================
-
-    async isCartEmpty() {
-
-        return await this.emptyCartMessage.isVisible();
-    }
-
-
-    // ==========================================
-    // Get Product Names
-    // ==========================================
-
-    async getProductNames() {
-
-        return await this.cartProductNames.allTextContents();
     }
 }
 

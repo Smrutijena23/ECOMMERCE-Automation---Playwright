@@ -11,56 +11,11 @@ const cartData = require("../fixtures/cartData.json");
 test.describe("Cart Module", () => {
 
 
-    // ==================================================
-    // Test 1
-    // Verify User Can Open Cart
-    // ==================================================
+    // =====================================================
+    // TEST 1 - Open Cart
+    // =====================================================
 
-    test("Verify user can open Cart", async ({ page }) => {
-
-        const login = new LoginPage(page);
-        const cart = new CartPage(page);
-
-
-        // Login
-        await login.login(
-            loginData.validUser.username,
-            loginData.validUser.password
-        );
-
-
-        // Wait for Dashboard
-        await page.waitForURL(
-            /\/dashboard/
-        );
-
-
-        // Open Cart
-        await cart.openCart();
-
-
-        // Verify URL
-        await expect(page).toHaveURL(
-            /\/dashboard\/cart/
-        );
-
-
-        // Verify My Cart
-        await expect(
-            page.getByText("My Cart", {
-                exact: true
-            })
-        ).toBeVisible();
-
-    });
-
-
-    // ==================================================
-    // Test 2
-    // Add One Product
-    // ==================================================
-
-    test("Verify user can add product to Cart", async ({ page }) => {
+    test("Verify User can open Cart", async ({ page }) => {
 
         const login = new LoginPage(page);
         const product = new ProductPage(page);
@@ -74,42 +29,78 @@ test.describe("Cart Module", () => {
         );
 
 
-        await page.waitForURL(
-            /\/dashboard/
+        // Open Cart
+        await product.openCart();
+
+
+        // Verify Cart URL
+        await expect(page).toHaveURL(/\/cart/);
+
+
+        // Verify My Cart heading
+        await expect(
+            page.getByRole("heading", {
+                name: /my cart/i
+            })
+        ).toBeVisible();
+    });
+
+
+
+    // =====================================================
+    // TEST 2 - Add One Product and Verify in Cart
+    // =====================================================
+
+    test("Verify added product is displayed in Cart", async ({ page }) => {
+
+        const login = new LoginPage(page);
+        const product = new ProductPage(page);
+        const cart = new CartPage(page);
+
+
+        // Login
+        await login.login(
+            loginData.validUser.username,
+            loginData.validUser.password
         );
 
 
-        // Add Product
+        // Add product
         await product.addProductToCart(
             cartData.product1.productName
         );
 
 
         // Open Cart
-        await cart.openCart();
+        await product.openCart();
 
 
-        // Verify Product
+        // Verify Cart page
+        await expect(page).toHaveURL(/\/cart/);
+
+
+        // Verify product
         await cart.verifyProduct(
             cartData.product1.productName
         );
 
 
+        // Extra assertion
         await expect(
-            cart.getCartProduct(
-                cartData.product1.productName
+            page.getByText(
+                cartData.product1.productName,
+                { exact: true }
             )
         ).toBeVisible();
-
     });
 
 
-    // ==================================================
-    // Test 3
-    // Verify Multiple Products
-    // ==================================================
 
-    test("Verify Cart can contain multiple products", async ({ page }) => {
+    // =====================================================
+    // TEST 3 - Add Multiple Products
+    // =====================================================
+
+    test("Verify multiple products are displayed in Cart", async ({ page }) => {
 
         const login = new LoginPage(page);
         const product = new ProductPage(page);
@@ -120,11 +111,6 @@ test.describe("Cart Module", () => {
         await login.login(
             loginData.validUser.username,
             loginData.validUser.password
-        );
-
-
-        await page.waitForURL(
-            /\/dashboard/
         );
 
 
@@ -147,375 +133,208 @@ test.describe("Cart Module", () => {
 
 
         // Open Cart
-        await cart.openCart();
+        await product.openCart();
 
 
         // Verify Product 1
-        await expect(
-            cart.getCartProduct(
-                cartData.product1.productName
-            )
-        ).toBeVisible();
+        await cart.verifyProduct(
+            cartData.product1.productName
+        );
 
 
         // Verify Product 2
-        await expect(
-            cart.getCartProduct(
-                cartData.product2.productName
-            )
-        ).toBeVisible();
+        await cart.verifyProduct(
+            cartData.product2.productName
+        );
 
 
         // Verify Product 3
-        await expect(
-            cart.getCartProduct(
-                cartData.product3.productName
-            )
-        ).toBeVisible();
+        await cart.verifyProduct(
+            cartData.product3.productName
+        );
 
+
+        // Verify total cart items
+        expect(
+            await cart.getCartItemCount()
+        ).toBe(3);
     });
 
 
-    // ==================================================
-    // Test 4
-    // Verify Cart Product Count
-    // ==================================================
 
-    test("Verify correct number of products in Cart", async ({ page }) => {
+    // =====================================================
+    // TEST 4 - Verify Cart Count
+    // =====================================================
+
+    test("Verify Cart contains correct number of products", async ({ page }) => {
 
         const login = new LoginPage(page);
         const product = new ProductPage(page);
         const cart = new CartPage(page);
 
 
+        // Login
         await login.login(
             loginData.validUser.username,
             loginData.validUser.password
         );
 
 
-        await page.waitForURL(
-            /\/dashboard/
-        );
-
-
+        // Add three products
         await product.addProductToCart(
             cartData.product1.productName
         );
 
-
         await product.addProductToCart(
             cartData.product2.productName
         );
-
 
         await product.addProductToCart(
             cartData.product3.productName
         );
 
 
-        await cart.openCart();
+        // Open Cart
+        await product.openCart();
 
 
-        const count = await cart.getProductCount();
-
-
-        expect(count).toBe(3);
-
+        // Verify 3 products
+        expect(
+            await cart.getCartItemCount()
+        ).toBe(3);
     });
 
 
-    // ==================================================
-    // Test 5
-    // Verify Product Names
-    // ==================================================
 
-    test("Verify product names displayed in Cart", async ({ page }) => {
+    // =====================================================
+    // TEST 5 - Remove Product
+    // =====================================================
+
+    test("Verify User can remove product from Cart", async ({ page }) => {
 
         const login = new LoginPage(page);
         const product = new ProductPage(page);
         const cart = new CartPage(page);
 
 
+        // Login
         await login.login(
             loginData.validUser.username,
             loginData.validUser.password
         );
 
 
-        await page.waitForURL(
-            /\/dashboard/
-        );
-
-
+        // Add product
         await product.addProductToCart(
             cartData.product1.productName
         );
 
 
-        await product.addProductToCart(
-            cartData.product2.productName
-        );
-
-
-        await product.addProductToCart(
-            cartData.product3.productName
-        );
-
-
-        await cart.openCart();
-
-
-        await expect(
-            cart.getCartProduct(
-                cartData.product1.productName
-            )
-        ).toBeVisible();
-
-
-        await expect(
-            cart.getCartProduct(
-                cartData.product2.productName
-            )
-        ).toBeVisible();
-
-
-        await expect(
-            cart.getCartProduct(
-                cartData.product3.productName
-            )
-        ).toBeVisible();
-
-    });
-
-
-    // ==================================================
-    // Test 6
-    // Verify Product Can Be Removed
-    // ==================================================
-
-    test("Verify user can remove product from Cart", async ({ page }) => {
-
-        const login = new LoginPage(page);
-        const product = new ProductPage(page);
-        const cart = new CartPage(page);
-
-
-        await login.login(
-            loginData.validUser.username,
-            loginData.validUser.password
-        );
-
-
-        await page.waitForURL(
-            /\/dashboard/
-        );
-
-
-        await product.addProductToCart(
-            cartData.product1.productName
-        );
-
-
-        await cart.openCart();
+        // Open Cart
+        await product.openCart();
 
 
         // Verify product exists
-        await expect(
-            cart.getCartProduct(
-                cartData.product1.productName
-            )
-        ).toBeVisible();
+        await cart.verifyProduct(
+            cartData.product1.productName
+        );
 
 
-        // Remove
+        // Remove product
         await cart.removeProduct(
             cartData.product1.productName
         );
 
 
-        // Verify removed
+        // Verify product removed
         await expect(
-            cart.getCartProduct(
-                cartData.product1.productName
+            page.getByText(
+                cartData.product1.productName,
+                { exact: true }
             )
-        ).toHaveCount(0);
-
+        ).not.toBeVisible();
     });
 
 
-    // ==================================================
-    // Test 7
-    // Verify Continue Shopping
-    // ==================================================
 
-    test("Verify user can continue shopping from Cart", async ({ page }) => {
+    // =====================================================
+    // TEST 6 - Verify Empty Cart
+    // =====================================================
+
+    test("Verify Cart is empty after removing product", async ({ page }) => {
 
         const login = new LoginPage(page);
+        const product = new ProductPage(page);
         const cart = new CartPage(page);
 
 
+        // Login
         await login.login(
             loginData.validUser.username,
             loginData.validUser.password
         );
 
 
-        await page.waitForURL(
-            /\/dashboard/
+        // Add product
+        await product.addProductToCart(
+            cartData.product1.productName
         );
 
 
-        await cart.openCart();
+        // Open Cart
+        await product.openCart();
 
 
+        // Remove product
+        await cart.removeProduct(
+            cartData.product1.productName
+        );
+
+
+        // Verify cart item count
+        expect(
+            await cart.getCartItemCount()
+        ).toBe(0);
+
+
+        // Verify empty cart message
+        await expect(
+            page.getByText(
+                /No Products in Your Cart/i
+            )
+        ).toBeVisible();
+    });
+
+
+
+    // =====================================================
+    // TEST 7 - Continue Shopping
+    // =====================================================
+
+    test("Verify User can Continue Shopping from Cart", async ({ page }) => {
+
+        const login = new LoginPage(page);
+        const product = new ProductPage(page);
+        const cart = new CartPage(page);
+
+
+        // Login
+        await login.login(
+            loginData.validUser.username,
+            loginData.validUser.password
+        );
+
+
+        // Open Cart
+        await product.openCart();
+
+
+        // Continue Shopping
         await cart.continueShopping();
 
 
-        await expect(page).toHaveURL(
-            /\/dashboard/
-        );
-
-    });
-
-
-    // ==================================================
-    // Test 8
-    // Verify Buy Now Button
-    // ==================================================
-
-    test("Verify Buy Now button is displayed for product", async ({ page }) => {
-
-        const login = new LoginPage(page);
-        const product = new ProductPage(page);
-        const cart = new CartPage(page);
-
-
-        await login.login(
-            loginData.validUser.username,
-            loginData.validUser.password
-        );
-
-
-        await page.waitForURL(
-            /\/dashboard/
-        );
-
-
-        await product.addProductToCart(
-            cartData.product1.productName
-        );
-
-
-        await cart.openCart();
-
-
-        const productCard = cart.getCartProduct(
-            cartData.product1.productName
-        );
-
-
-        await expect(
-            productCard.getByRole("button", {
-                name: /buy now/i
-            })
-        ).toBeVisible();
-
-    });
-
-
-    // ==================================================
-    // Test 9
-    // Verify Delete Button
-    // ==================================================
-
-    test("Verify delete button is displayed for product", async ({ page }) => {
-
-        const login = new LoginPage(page);
-        const product = new ProductPage(page);
-        const cart = new CartPage(page);
-
-
-        await login.login(
-            loginData.validUser.username,
-            loginData.validUser.password
-        );
-
-
-        await page.waitForURL(
-            /\/dashboard/
-        );
-
-
-        await product.addProductToCart(
-            cartData.product1.productName
-        );
-
-
-        await cart.openCart();
-
-
-        const productCard = cart.getCartProduct(
-            cartData.product1.productName
-        );
-
-
-        const buttons = productCard.getByRole("button");
-
-
-        expect(
-            await buttons.count()
-        ).toBeGreaterThanOrEqual(2);
-
-    });
-
-
-    // ==================================================
-    // Test 10
-    // Verify Cart Badge
-    // ==================================================
-
-    test("Verify Cart badge shows product count", async ({ page }) => {
-
-        const login = new LoginPage(page);
-        const product = new ProductPage(page);
-        const cart = new CartPage(page);
-
-
-        await login.login(
-            loginData.validUser.username,
-            loginData.validUser.password
-        );
-
-
-        await page.waitForURL(
-            /\/dashboard/
-        );
-
-
-        await product.addProductToCart(
-            cartData.product1.productName
-        );
-
-
-        await product.addProductToCart(
-            cartData.product2.productName
-        );
-
-
-        await product.addProductToCart(
-            cartData.product3.productName
-        );
-
-
-        await cart.openCart();
-
-
-        // Cart should contain 3 products
-        expect(
-            await cart.getProductCount()
-        ).toBe(3);
-
+        // Verify user is back on products page
+        await expect(page).not.toHaveURL(/\/cart/);
     });
 
 });

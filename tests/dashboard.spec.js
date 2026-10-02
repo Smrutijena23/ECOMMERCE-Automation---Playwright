@@ -39,7 +39,7 @@ test.describe("Dashboard Module", () => {
         await dashboard.openCart();
 
         await expect(page).toHaveURL(/cart/);
-
+    
     });
 
 });
